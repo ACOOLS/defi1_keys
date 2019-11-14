@@ -44,17 +44,17 @@ This Work was applied on Keys datasets
   Les lignes à modifier sont :
     pour classes -> ligne 610,696,783  classes=3
     pour filters -> ligne 603,689,776  filters=24
-	#7. Télécharger les poids de YOLOv3 :
-	wget https://pjreddie.com/media/files/yolov3.weights
-	#8. Convert the Darknet YOLO model to a Keras model
-	python convert.py yolov3.cfg yolov3.weights model_data/yolo_weights.h5
-	#9. Lancer train1 and train2 :
-	python train1.py --initial_epoch1 0 --epoch1 75 --batch_size1 16  --annotation 'annotations.csv' --classes 'model_data/key_classes.txt' --anchors 'model_data/yolo_anchors.txt' 
-	python train2.py --initial_epoch2 75 --epoch2 150 --batch_size2 8 --annotation 'annotations.csv' --classes 'model_data/key_classes.txt' --anchors 'model_data/yolo_anchors.txt' 
-	#10. Lancer la détection YOLO sur la base d'images de test:
-	python test_yolo.py --image --input='test' --model 'ep138-loss5.570-val_loss5.466.h5' --classes 'model_data/key_classes.txt' --anchors 'model_data/yolo_anchors.txt'
+  #7. Télécharger les poids de YOLOv3 :
+  wget https://pjreddie.com/media/files/yolov3.weights
+  #8. Convert the Darknet YOLO model to a Keras model
+  python convert.py yolov3.cfg yolov3.weights model_data/yolo_weights.h5
+  #9. Lancer train1 and train2 :
+  python train1.py --initial_epoch1 0 --epoch1 75 --batch_size1 16  --annotation 'annotations.csv' --classes     'model_data/key_classes.txt' --anchors 'model_data/yolo_anchors.txt' 
+  python train2.py --initial_epoch2 75 --epoch2 150 --batch_size2 8 --annotation 'annotations.csv' --classes 'model_data/key_classes.txt' --anchors 'model_data/yolo_anchors.txt' 
+  #10. Lancer la détection YOLO sur la base d'images de test:
+  python test_yolo.py --image --input='test' --model 'ep138-loss5.570-val_loss5.466.h5' --classes 'model_data/key_classes.txt' --anchors 'model_data/yolo_anchors.txt'
   #11. Lancer la détection des clés sur la vidéo
-	python test_yolo.py --video --input "video-157367863.mp4" --output "video.mp4"  --model 'ep138-loss5.570-val_loss5.466.h5' --classes 'model_data/key_classes.txt' --anchors 'model_data/yolo_anchors.txt' 
+python test_yolo.py --video --input "video-157367863.mp4" --output "video.mp4"  --model 'ep138-loss5.570-val_loss5.466.h5' --classes 'model_data/key_classes.txt' --anchors 'model_data/yolo_anchors.txt' 
 ```
 
 ### Usage
