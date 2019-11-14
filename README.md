@@ -1,18 +1,13 @@
 # keras-yolo3
 
-
-
-
-test
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE)
-
 ## Introduction
 
-A Keras implementation of YOLOv3 (Tensorflow backend) inspired by [qqwweee/keras-yolo3](https://github.com/qqwweee/keras-yolo3).
+A Keras implementation of YOLOv3 (Tensorflow backend) inspired by [qqwweee/keras-yolo3](https://github.com/qqwweee/keras-yolo3)
+, [belarbi2733/keras_yolov3](https://github.com/belarbi2733/keras_yolov3) et [AlexeyAB/darknet](https://github.com/AlexeyAB/darknet?files=1&fbclid=IwAR0SXGIApiAwQi56RpME1urZQyO0EAGGWHfPLCmyhA-Uoa3xlAjGIbIPBF0).
 This Work was applied on Keys datasets
 
 <p align="center">
-  <img src="yolo1.jpg" width="350" title="hover text">
+  <img src="output_20.jpg" width="350" title="hover text">
 </p>
 
 
@@ -28,29 +23,39 @@ This Work was applied on Keys datasets
 
 ```
 ## How it works
-	#1. Download datasets :
+  #0. Importation des fichiers sur le git
+  git clone https://github.com/ACOOLS/keras_yolov3
+	#1. Téléchargement des clés et backgrounds:
 	wget https://github.com/belarbi2733/keras_yolov3/releases/download/1/key_wb.zip
 	wget https://github.com/belarbi2733/keras_yolov3/releases/download/1/bckgrnd.zip
+  #2. Décompression :
 	unzip key_wb.zip
 	unzip bckgrnd.zip
-	#2. Combine Keys with Backgrounds :
+	#3. Génération des fichiers  : annontation et keys_and_background:
 	python keys_with_background.py --keys "key_wb" --background "bckgrnd" --output "keys_and_background"
-	mv keys_and_background/annotations.csv .
-	#3. Download YOLOv3 weights :
+  #4. Téléchargement de la base gender_man_woman
+  wget https://github.com/ACOOLS/mon_code/releases/download/face/gender_dataset_face.zip 
+  #5. Génération du fichier annonation.csv qui sera complété sur base de l'ancien fichier annotations.csv
+  python face_annotations.py
+  comme les images sont des visages des hommes et des femmes, donc nous avons pris x1=0,x2=x1+width,y1=0,y2=y1+height, veut dire nous avons pris toute l'image. 
+  #6. Adaptation du fichier yolov3.cfg dans le dossier datasets
+  Les changements sont le nombre des classes et les filtres 
+  filters= (classes+5)*3
+  Les lignes à modifier sont :
+    pour classes -> ligne 610,696,783  classes=3
+    pour filters -> ligne 603,689,776  filters=24
+	#7. Télécharger les poids de YOLOv3 :
 	wget https://pjreddie.com/media/files/yolov3.weights
-	#4. Convert the Darknet YOLO model to a Keras model
+	#8. Convert the Darknet YOLO model to a Keras model
 	python convert.py yolov3.cfg yolov3.weights model_data/yolo_weights.h5
-	#5. Run train1 and train2 :
-	python train1.py --initial_epoch1 0 --epoch1 5 --batch_size1 64  --annotation 'annotations.csv' --classes 'model_data/key_classes.txt' --anchors 'model_data/yolo_anchors.txt' 
-	python train2.py --initial_epoch2 5 --epoch2 10 --batch_size2 64 --annotation 'annotations.csv' --classes 'model_data/key_classes.txt' --anchors 'model_data/yolo_anchors.txt' 
-	#6. Run YOLO detection :
-	python test_yolo.py --image --input='keys_and_background/gen_0001.jpg' --output='yolo1.jpg' --model 'weights_yolo_train/trained_weights_final.h5' --classes 'model_data/key_classes.txt' --anchors 'model_data/yolo_anchors.txt'
-
-###Bonus test with video	
-	python yolo_test.py input='video_path' output='video_saved' --video    for video detection mode 
+	#9. Lancer train1 and train2 :
+	python train1.py --initial_epoch1 0 --epoch1 75 --batch_size1 16  --annotation 'annotations.csv' --classes 'model_data/key_classes.txt' --anchors 'model_data/yolo_anchors.txt' 
+	python train2.py --initial_epoch2 75 --epoch2 150 --batch_size2 8 --annotation 'annotations.csv' --classes 'model_data/key_classes.txt' --anchors 'model_data/yolo_anchors.txt' 
+	#10. Lancer la détection YOLO sur la base d'images de test:
+	python test_yolo.py --image --input='test' --model 'ep138-loss5.570-val_loss5.466.h5' --classes 'model_data/key_classes.txt' --anchors 'model_data/yolo_anchors.txt'
+  #11. Lancer la détection des clés sur la vidéo
+	python test_yolo.py --video --input "video-157367863.mp4" --output "video.mp4"  --model 'ep138-loss5.570-val_loss5.466.h5' --classes 'model_data/key_classes.txt' --anchors 'model_data/yolo_anchors.txt' 
 ```
-
-For Tiny YOLOv3, just do in a similar way, just specify model path and anchor path with `--model model_file` and `--anchors anchor_file`.
 
 ### Usage
 Use --help to see usage of yolo_video.py:
@@ -74,34 +79,6 @@ optional arguments:
 ```
 ---
 
-
-## Explain the Training for other datasets
-
-1. Generate your own annotation file and class names file.  
-    One row for one image;  
-    Row format: `image_file_path box1 box2 ... boxN`;  
-    Box format: `x_min,y_min,x_max,y_max,class_id` (no space).  
-    For VOC dataset, try `python voc_annotation.py`  
-    Here is an example:
-    ```
-    path/to/img1.jpg 50,100,150,200,0 30,50,200,120,3
-    path/to/img2.jpg 120,300,250,600,2
-    ...
-    ```
-
-2. Make sure you have run `python convert.py -w yolov3.cfg yolov3.weights model_data/yolo_weights.h5`  
-    The file model_data/yolo_weights.h5 is used to load pretrained weights.
-
-3. Modify train.py and start training.  
-    `python train.py`  
-    Use your trained weights or checkpoint weights with command line option `--model model_file` when using yolo_video.py
-    Remember to modify class path or anchor path, with `--classes class_file` and `--anchors anchor_file`.
-
-If you want to use original pretrained weights for YOLOv3:  
-    1. `wget https://pjreddie.com/media/files/darknet53.conv.74`  
-    2. rename it as darknet53.weights  
-    3. `python convert.py -w darknet53.cfg darknet53.weights model_data/darknet53_weights.h5`  
-    4. use model_data/darknet53_weights.h5 in train.py
 
 ---
 
